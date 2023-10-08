@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  virtu_care_postgres:
+    container_name: virtu_care_postgres
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${VIRTU_CARE_POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${VIRTU_CARE_POSTGRES_PASSWD:-hunter2}
+      POSTGRES_DB: ${VIRTU_CARE_POSTGRES_DB:-virtu_care}
+    ports:
+      - ${VIRTU_CARE_POSTGRES_PORT:-5432}:5432
+    volumes:
+      - virtu_care_data:/var/lib/postgresql/data
+volumes:
+  virtu_care_data: ~
+networks:
+  example-net:
+    driver: bridge
