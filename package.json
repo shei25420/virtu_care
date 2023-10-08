@@ -1,0 +1,24 @@
+{
+  "name": "virtu_care",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "pnpm exec turbo run build",
+    "clean": "pnpm run --parallel -r clean",
+    "format": "pnpm run --parallel -r format",
+    "lint": "pnpm exec turbo run lint",
+    "test": "pnpm exec turbo run test",
+    "db:up": "docker-compose up --no-recreate virtu_care_postgres",
+    "db:down": "docker stop -t 15 virtu_care_postgres",
+    "db:run": "docker start virtu_care_postgres",
+    "typecheck": "pnpm exec turbo run typecheck",
+    "uninstall": "pnpm -r exec rm -rf node_modules"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "turbo": "^1.10.14"
+  }
+}
