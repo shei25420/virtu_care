@@ -1,0 +1,25 @@
+{
+  "name": "@connectors/prisma",
+  "version": "0.0.0",
+  "description": "Prisma Database Connector Package",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "prisma generate --schema ./src/plugins/prisma/schema.prisma",
+    "schema:clean": "rm -rf ./prisma",
+    "schema:init": "prisma init",
+    "schema:merge": "cat ./src/prisma/models/* >> ./src/prisma/schema.prisma",
+    "schema:push": "prisma db push --schema ./src/plugins/prisma/schema.prisma",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prisma": "^5.3.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.3.1"
+  }
+}
