@@ -4,7 +4,7 @@ describe('RabbitMQ', () => {
     let rabbitMQ: RabbitMQ;
 
     beforeAll((done) => {
-        rabbitMQ = new RabbitMQ('amqps://gztpajlb:v2sZ-56M_GFyI6fbDY7LEc3LfFZmKFoN@shrimp.rmq.cloudamqp.com/gztpajlb'); // Replace with your RabbitMQ connection URL
+        rabbitMQ = new RabbitMQ(`amqps://${process.env.RABBITMQ_DEV_USER}:${process.env.RABBITMQ_DEV_PASSWD}@${process.env.RABBITMQ_DEV_HOST}/${process.env.RABBITMQ_DEV_VHOST}`); // Replace with your RabbitMQ connection URL
         rabbitMQ.createConnection().then(() => {
             done();
         }).catch(err => {
