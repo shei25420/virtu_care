@@ -2,14 +2,14 @@
   "name": "@shared/rabbitmq",
   "version": "0.0.0",
   "description": "RabbitMQ Helper Functions",
-  "main": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
-  "type": "module",
+  "type": "commonjs",
   "exports": {
     ".": {
+      "require": "./dist/index.cjs",
       "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs"
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
@@ -18,7 +18,7 @@
   "scripts": {
     "build": "unbuild",
     "clean": "rm -rf ./dist",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",

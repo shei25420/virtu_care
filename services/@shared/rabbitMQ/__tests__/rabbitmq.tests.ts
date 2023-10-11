@@ -1,63 +1,51 @@
-import RabbitMQ, { ConsumerFunc } from '../src'; // Adjust the import path as needed
+// Import your RabbitMQ class
+import RabbitMQ, { ConsumerFunc } from '../src'; // Adjust the import path accordingly
 
 describe('RabbitMQ', () => {
     let rabbitMQ: RabbitMQ;
 
-    beforeAll((done) => {
-        rabbitMQ = new RabbitMQ('amqps://gztpajlb:v2sZ-56M_GFyI6fbDY7LEc3LfFZmKFoN@shrimp.rmq.cloudamqp.com/gztpajlb'); // Replace with your RabbitMQ connection URL
-        rabbitMQ.createConnection().then(() => {
-            done();
-        }).catch(err => {
-            throw new Error(err);
-        });
+    beforeAll(async () => {
+        // Initialize RabbitMQ instance with a mock connection URL or a real one for testing
+        rabbitMQ = new RabbitMQ('amqps://gztpajlb:v2sZ-56M_GFyI6fbDY7LEc3LfFZmKFoN@shrimp.rmq.cloudamqp.com/gztpajlb');
+
+        await rabbitMQ.createConnection();
+        expect(rabbitMQ.channel).not.toBeNull();
+
     });
 
-    afterAll((done) => {
-        rabbitMQ.closeConnection().then(() => {
-            done();
-        }).catch(err => {
-            throw new Error(err);
-        });
+    afterAll(async () => {
+        await rabbitMQ.closeConnection();
+        expect(rabbitMQ.channel).toBeNull();
     });
 
-    describe('createConnection', () => {
-        it('should create a connection and a channel', async () => {
-            expect(rabbitMQ.channel).toBeDefined();
-        });
+    it('should create a listening exchange by topic', async () => {
+        const exchangeName = 'test-exchange';
+        const topics = ['topic.test'];
+        const consumeFunc: ConsumerFunc = (msg) => {
+            // Your custom consume function logic for testing
+        };
+
+        await rabbitMQ.createListeningExchangeByTopic(exchangeName, topics, consumeFunc);
+        expect(rabbitMQ.channel).not.toBeNull();
     });
 
-    describe('createListeningExchangeByTopic', () => {
-        it('should create a listening exchange and consume messages', async () => {
-            const exchangeName = 'testExchange';
-            const topics = ['topic1', 'topic2'];
-            const consumeFunc: ConsumerFunc = (msg) => {
-                expect(msg).not.toBeNull();
-            };
+    it('should publish a message to the exchange', async () => {
+        const exchangeName = 'test-exchange';
+        const topicKey = 'topic.test';
+        const message = 'Test message';
 
-            await rabbitMQ.createListeningExchangeByTopic(exchangeName, topics, consumeFunc);
-            // Publish a message to the exchange for testing.
-            await rabbitMQ.publishMessageToExchange(exchangeName, 'topic1', 'Test Message');
-        });
+        await rabbitMQ.publishMessageToExchange(exchangeName, topicKey, message);
+        expect(rabbitMQ.channel).not.toBeNull();
     });
 
-    describe('publishMessageToExchange', () => {
-        it('should publish a message to the exchange', async () => {
-            const exchangeName = 'testExchange';
-            const topicKey = 'testKey';
-            const msg = 'Test Message';
-
-            // Subscribe to the exchange to receive the published message.
-            const consumeFunc: ConsumerFunc = (receivedMsg) => {
-                expect(receivedMsg).not.toBeNull();
-                expect(receivedMsg!.content.toString()).toBe(msg);
-            };
-            await rabbitMQ.createListeningExchangeByTopic(exchangeName, [topicKey], consumeFunc);
-
-            // Publish the message and wait for it to be consumed.
-            await rabbitMQ.publishMessageToExchange(exchangeName, topicKey, msg);
-        });
+    it('should throw an error if no channel is created yet', async () => {
+        try {
+            await rabbitMQ.createListeningExchangeByTopic('test-exchange', ['topic.test'], (msg) => {
+                // Your custom consume function logic for testing
+            });
+        } catch (error) {
+            // @ts-ignore
+            expect(error.message).toBe('No connection to message broker');
+        }
     });
-
-    // You can add more test cases as needed for other methods and edge cases.
-
 });

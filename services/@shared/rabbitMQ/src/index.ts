@@ -1,4 +1,4 @@
-import { connect, Message, Channel, Connection } from 'amqplib/callback_api'
+import { connect, Message, Channel, Connection } from 'amqplib'
 
 export type ConsumerFunc = (msg: Message | null) => void;
 
@@ -12,88 +12,69 @@ class RabbitMQ {
     }
 
     async createConnection () {
-        return new Promise((resolve, reject) => {
-            connect(this.connectionUrl,{
+        try {
+            this.connection = await connect(this.connectionUrl, {
                 heartbeat: 2
-            },(err, connection) => {
-                if (err) reject(new Error("Error making connection to rabbitmq", {
-                    cause: err
-                }));
-
-                this.connection = connection;
-                this.connection.createChannel((err, channel) => {
-                    if (err) reject(new Error("Error creating channel", {
-                        cause: err
-                    }));
-                    this._channel = channel;
-                    resolve(undefined);
-                });
             });
-        });
+
+            this._channel = await this.connection.createChannel();
+        } catch (e) {
+            throw new Error("Error creating connection", {
+                cause: e
+            });
+        }
     }
 
     async createListeningExchangeByTopic (exchangeName: string, topics: string[], consumeFunc: ConsumerFunc) {
-        return new Promise((resolve, reject) => {
-            if (!this.connection) reject(new Error("No connection to message broker"));
-            if (!this._channel) reject(new Error("No channel has been created yet"));
+        if (!this.connection) throw new Error("No connection to message broker");
+        if (!this._channel) throw new Error("No channel has been created yet");
 
-            this._channel?.assertExchange(exchangeName, 'topic', {
+        try {
+            await this._channel.assertExchange(exchangeName, 'topic', {
                 durable: true
-            }, (err) => {
-                if (err) reject(new Error("Error asserting topic exchange", { cause: err }));
-                this.channel?.assertQueue("", {
-                    exclusive: true
-                }, (err, replies) => {
-                    if (err) reject(new Error(`Error asserting to queue`, {
-                        cause: err
-                    }));
-
-                    console.log("[*] Waiting to for messages....");
-
-                    //Bind to the topics the generated queue
-                    topics.forEach(topic => {
-                        this._channel?.bindQueue(replies.queue, exchangeName, topic, null, (err, ok) => {
-                            if (err) reject(new Error(`Error binding to queue: ${replies.queue}`, {
-                                cause: err
-                            }));
-                        });
-                    });
-                    this._channel?.consume(replies.queue, consumeFunc, {
-                        noAck: true
-                    }, (err, ok) => {
-                        if (err) reject(new Error(`Error consuming messages from queue: ${replies.queue}`, {
-                            cause: err
-                        }));
-                        resolve(undefined);
-                    });
-                });
             });
-        });
+
+            const replies = await this._channel.assertQueue("", {
+                exclusive: true
+            });
+            console.log("[+] waiting for messages");
+
+            const repliesConsume = await this._channel.consume(replies.queue, consumeFunc);
+        } catch (e) {
+            throw new Error("Error creating listening exchange topic", {
+                cause: e
+            });
+        }
     }
     async publishMessageToExchange (exchangeName: string, topicKey: string, msg: any) {
-        return new Promise((resolve, reject) => {
-            if (!this.connection) reject(new Error("No connection to message broker"));
-            if (!this._channel) reject(new Error("No message broker channel created"));
+        if (!this.connection) throw new Error("No connection to message broker");
+        if (!this._channel) throw new Error("No message broker channel created");
 
-            this._channel?.assertExchange(exchangeName, 'topic', {
+        try {
+            const assertExchange = await this._channel.assertExchange(exchangeName, 'topic', {
                 durable: true
-            }, (err, replies) => {
-                if (err) reject(new Error("Error asserting topic exchange", { cause: err }));
-                resolve(this._channel?.publish(exchangeName, topicKey, Buffer.from(msg)));
             });
-        });
+
+            this.channel?.publish(exchangeName, topicKey, Buffer.from(msg));
+        } catch (e) {
+            throw new Error("Error publishing message to exchange", {
+                cause: e
+            });
+        }
     }
 
     async closeConnection () {
-        return new Promise((resolve, reject) => {
-            if (!this.connection) reject(new Error("No connection established to message broker"));
-            this.connection?.close((err) => {
-                if (err) reject(new Error("Error closing connection", {
-                    cause: err
-                }));
-                resolve(undefined);
+        if (!this.connection) throw new Error("No connection established to message broker");
+
+        try {
+            await this.connection.close();
+            this._channel = null;
+            this.connection = null;
+        } catch (e) {
+            throw new Error("Error closing connection", {
+                cause: e
             });
-        });
+        }
     }
 
     get channel(): Channel | null {
