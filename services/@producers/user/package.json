@@ -1,0 +1,42 @@
+{
+  "name": "@producers/user",
+  "version": "0.0.0",
+  "description": "User Producer Service",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "clean": "rm -rf ./dist",
+    "format": "echo \"@shared/rabbitMQ `format` not implemented\"; exit 0;",
+    "lint": "echo \"@shared/rabbitMQ `lint` not implemented\"; exit 0;",
+    "test": "echo \"@shared/rabbitMQ `test` not implemented\"; exit 0;",
+    "typecheck": "tsc --noEmit",
+    "dev": "NODE_ENV=development node ./dist/index.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@connectors/prisma": "workspace:^",
+    "@shared/rabbitmq": "workspace:^",
+    "amqplib": "^0.10.3",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.23.2",
+    "fastify-plugin": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.2",
+    "@types/bcrypt": "^5.0.0",
+    "unbuild": "^2.0.0"
+  }
+}

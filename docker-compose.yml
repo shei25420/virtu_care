@@ -12,8 +12,20 @@ services:
       - ${VIRTU_CARE_POSTGRES_PORT:-5432}:5432
     volumes:
       - virtu_care_data:/var/lib/postgresql/data
+  virtu_care_rabbitmq:
+      container_name: virtu_care_rabbitmq
+      image: rabbitmq:3.12.6-management-alpine
+      restart: always
+      environment:
+        RABBITMQ_DEFAULT_USER: ${VIRTU_CARE_RABBITMQ_USER:-user}
+        RABBITMQ_DEFAULT_PASS: ${VIRTU_CARE_RABBITMQ_PASS:-hunter2}
+      ports:
+        - ${VIRTU_CARE_RABBITMQ_PORT:-5672}:5672
+      volumes:
+        - virtu_care_rabbitmq_data:/var/lib/rabbitmq/data
 volumes:
   virtu_care_data: ~
+  virtu_care_rabbitmq_data: ~
 networks:
   example-net:
     driver: bridge
