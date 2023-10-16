@@ -3,15 +3,19 @@
   "version": "0.0.0",
   "description": "Prisma Database Connector Package",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "prisma generate --schema ./src/plugins/prisma/schema.prisma",
+    "build": "schema:clean; prisma generate --schema ./prisma/schema.prisma",
     "schema:clean": "rm -rf ./prisma",
     "schema:init": "prisma init",
-    "schema:merge": "cat ./src/prisma/models/* >> ./src/prisma/schema.prisma",
+    "schema:merge": "cat ./models/* >> ./prisma/schema.prisma",
     "schema:push": "prisma db push --schema ./src/plugins/prisma/schema.prisma",
     "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.js",
+    "types": "./dist/index.d.ts"
   },
   "keywords": [],
   "author": "",
